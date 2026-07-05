@@ -207,9 +207,10 @@ function createRichTextNode(specifyText) {
   height = Math.ceil(height)
   // 修复空文本节点（<p><br></p>）测得的宽度约为0（data-width=1）的问题：
   // 会导致进入文本编辑时 scaleX=ceil(rect.width)/data-width 失真、编辑框变形，
-  // 同时节点形状边框宽度塌陷而几乎不可见。空内容时给一个与行高相当的最小宽度。
+  // 同时节点形状边框宽度塌陷而几乎不可见。空内容时给一个细窄的最小宽度，
+  // 使其呈现为一条细线（空光标占位），同时保证 scale 不失真、边框可见。
   if (width <= 1 && height > 0) {
-    width = height
+    width = 10
   }
   g.attr('data-width', width)
   g.attr('data-height', height)
