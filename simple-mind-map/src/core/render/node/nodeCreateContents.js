@@ -205,6 +205,12 @@ function createRichTextNode(specifyText) {
   }
   width = Math.min(Math.ceil(width) + 1, textAutoWrapWidth) // 修复getBoundingClientRect方法对实际宽度是小数的元素获取到的值是整数，导致宽度不够文本发生换行的问题
   height = Math.ceil(height)
+  // 修复空文本节点（<p><br></p>）测得的宽度约为0（data-width=1）的问题：
+  // 会导致进入文本编辑时 scaleX=ceil(rect.width)/data-width 失真、编辑框变形，
+  // 同时节点形状边框宽度塌陷而几乎不可见。空内容时给一个与行高相当的最小宽度。
+  if (width <= 1 && height > 0) {
+    width = height
+  }
   g.attr('data-width', width)
   g.attr('data-height', height)
   const foreignObject = createForeignObjectNode({
