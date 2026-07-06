@@ -300,7 +300,15 @@ export default {
     coverTip: '你当前自定义过基础样式，是否覆盖？',
     tip: '提示',
     cover: '覆盖',
-    reserve: '保留'
+    reserve: '保留',
+    bgPattern: '背景花纹',
+    patternNone: '无',
+    patternDots: '点阵',
+    patternGrid: '网格',
+    patternLinesH: '横线',
+    patternDiagonal: '斜线',
+    patternCrossDot: '十字点',
+    patternColor: '颜色'
   },
   toolbar: {
     undo: '回退',

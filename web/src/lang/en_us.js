@@ -307,7 +307,15 @@ export default {
       'You have currently customized the basic style, do you want to overwrite it?',
     tip: 'Tip',
     cover: 'Cover',
-    reserve: 'Reserve'
+    reserve: 'Reserve',
+    bgPattern: 'Background Pattern',
+    patternNone: 'None',
+    patternDots: 'Dots',
+    patternGrid: 'Grid',
+    patternLinesH: 'Lines',
+    patternDiagonal: 'Diagonal',
+    patternCrossDot: 'Cross',
+    patternColor: 'Color'
   },
   toolbar: {
     undo: 'Undo',

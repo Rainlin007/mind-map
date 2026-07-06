@@ -305,7 +305,15 @@ export default {
     coverTip: 'Bạn hiện đã tùy chỉnh kiểu cơ bản, bạn có muốn ghi đè không?',
     tip: 'Mẹo',
     cover: 'Ghi đè',
-    reserve: 'Giữ lại'
+    reserve: 'Giữ lại',
+    bgPattern: 'Hoa văn nền',
+    patternNone: 'Không',
+    patternDots: 'Chấm',
+    patternGrid: 'Lưới',
+    patternLinesH: 'Đường ngang',
+    patternDiagonal: 'Đường chéo',
+    patternCrossDot: 'Dấu cộng',
+    patternColor: 'Màu sắc'
   },
   toolbar: {
     undo: 'Hoàn tác',

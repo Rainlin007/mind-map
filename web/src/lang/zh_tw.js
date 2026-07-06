@@ -301,7 +301,15 @@ export default {
     coverTip: '您目前已自訂過基本樣式，是否要覆蓋？',
     tip: '提示',
     cover: '覆蓋',
-    reserve: '保留'
+    reserve: '保留',
+    bgPattern: '背景花紋',
+    patternNone: '無',
+    patternDots: '點陣',
+    patternGrid: '網格',
+    patternLinesH: '橫線',
+    patternDiagonal: '斜線',
+    patternCrossDot: '十字點',
+    patternColor: '顏色'
   },
   toolbar: {
     undo: '復原',

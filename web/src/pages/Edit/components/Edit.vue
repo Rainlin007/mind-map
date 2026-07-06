@@ -10,7 +10,9 @@
       class="mindMapContainer"
       id="mindMapContainer"
       ref="mindMapContainer"
-    ></div>
+    >
+      <div class="bgPatternOverlay" ref="bgPatternOverlay"></div>
+    </div>
     <Count :mindMap="mindMap" v-if="!isZenMode"></Count>
     <Navigator v-if="mindMap" :mindMap="mindMap"></Navigator>
     <NavigatorToolbar :mindMap="mindMap" v-if="!isZenMode"></NavigatorToolbar>
@@ -208,7 +210,11 @@ export default {
         state.localConfig.useLeftKeySelectionRightKeyDrag,
       extraTextOnExport: state => state.extraTextOnExport,
       isDragOutlineTreeNode: state => state.isDragOutlineTreeNode,
-      enableAi: state => state.localConfig.enableAi
+      enableAi: state => state.localConfig.enableAi,
+      backgroundPattern: state => state.localConfig.backgroundPattern,
+      bgPatternColor: state => state.localConfig.bgPatternColor,
+      bgPatternOpacity: state => state.localConfig.bgPatternOpacity,
+      isDark: state => state.localConfig.isDark
     })
   },
   watch: {
@@ -225,12 +231,22 @@ export default {
       } else {
         this.removeScrollbarPlugin()
       }
+    },
+    backgroundPattern() {
+      this.applyBackgroundPattern()
+    },
+    bgPatternColor() {
+      this.applyBackgroundPattern()
+    },
+    bgPatternOpacity() {
+      this.applyBackgroundPattern()
     }
   },
   mounted() {
     showLoading()
     this.getData()
     this.init()
+    this.applyBackgroundPattern()
     this.$bus.$on('execCommand', this.execCommand)
     this.$bus.$on('paddingChange', this.onPaddingChange)
     this.$bus.$on('export', this.export)
@@ -263,6 +279,54 @@ export default {
     this.mindMap.destroy()
   },
   methods: {
+    applyBackgroundPattern() {
+      const overlay = this.$refs.bgPatternOverlay
+      if (!overlay) return
+      const pattern = this.backgroundPattern
+      if (!pattern || pattern === 'none') {
+        overlay.style.backgroundImage = 'none'
+        overlay.style.backgroundSize = ''
+        return
+      }
+      const hex = this.bgPatternColor || '#808080'
+      const n = parseInt(hex.replace('#', ''), 16)
+      const r = (n >> 16) & 255
+      const g = (n >> 8) & 255
+      const b = n & 255
+      const a = (this.bgPatternOpacity ?? 30) / 100
+      const c = `rgba(${r},${g},${b},${a})`
+      const styles = {
+        dots: {
+          backgroundImage: `radial-gradient(circle, ${c} 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        },
+        grid: {
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px), linear-gradient(90deg, ${c} 1px, transparent 1px)`,
+          backgroundSize: '24px 24px'
+        },
+        linesHorizontal: {
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px)`,
+          backgroundSize: '10px 16px'
+        },
+        diagonal: {
+          backgroundImage: `repeating-linear-gradient(45deg, ${c}, ${c} 1px, transparent 1px, transparent 10px)`,
+          backgroundSize: ''
+        },
+        crossDot: {
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px), linear-gradient(90deg, ${c} 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }
+      }
+      const s = styles[pattern]
+      if (s) {
+        overlay.style.backgroundImage = s.backgroundImage
+        overlay.style.backgroundSize = s.backgroundSize
+      } else {
+        overlay.style.backgroundImage = 'none'
+        overlay.style.backgroundSize = ''
+      }
+    },
+
     onLocalStorageExceeded() {
       this.$notify({
         type: 'warning',
@@ -713,6 +777,17 @@ export default {
     top: 0px;
     width: 100%;
     height: 100%;
+
+    .bgPatternOverlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      background-repeat: repeat;
+    }
   }
 }
 </style>

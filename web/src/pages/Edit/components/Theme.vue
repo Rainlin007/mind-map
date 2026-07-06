@@ -22,6 +22,41 @@
           </div>
           <div class="name">{{ item.name }}</div>
         </div>
+        <!-- 背景花纹 -->
+        <div class="patternSection">
+          <div class="patternTitle">{{ $t('theme.bgPattern') }}</div>
+          <div class="patternGrid">
+            <div
+              class="patternCard"
+              v-for="p in patternList"
+              :key="p.value"
+              :class="{ active: backgroundPattern === p.value }"
+              @click="selectPattern(p.value)"
+            >
+              <div class="patternPreview" :style="getPatternPreviewStyle(p.value)"></div>
+              <div class="patternName">{{ p.name }}</div>
+            </div>
+          </div>
+          <div class="patternColorRow" v-if="backgroundPattern && backgroundPattern !== 'none'">
+            <span class="patternColorLabel">{{ $t('theme.patternColor') }}</span>
+            <input
+              type="color"
+              class="patternColorPicker"
+              :value="bgPatternColor"
+              @input="onPatternColorChange($event.target.value)"
+            />
+            <input
+              type="range"
+              class="patternOpacitySlider"
+              min="5"
+              max="100"
+              step="5"
+              :value="bgPatternOpacity"
+              @input="onPatternOpacityChange($event.target.value)"
+            />
+            <span class="patternOpacityValue">{{ bgPatternOpacity }}%</span>
+          </div>
+        </div>
       </div>
     </div>
   </Sidebar>
@@ -68,7 +103,10 @@ export default {
     ...mapState({
       isDark: state => state.localConfig.isDark,
       activeSidebar: state => state.activeSidebar,
-      extendThemeGroupList: state => state.extendThemeGroupList
+      extendThemeGroupList: state => state.extendThemeGroupList,
+      backgroundPattern: state => state.localConfig.backgroundPattern,
+      bgPatternColor: state => state.localConfig.bgPatternColor,
+      bgPatternOpacity: state => state.localConfig.bgPatternOpacity
     }),
 
     groupList() {
@@ -79,6 +117,15 @@ export default {
       return this.groupList.find(item => {
         return item.name === this.activeName
       }).list
+    },
+
+    patternList() {
+      return [
+        { value: 'none', name: this.$t('theme.patternNone') },
+        { value: 'dots', name: this.$t('theme.patternDots') },
+        { value: 'grid', name: this.$t('theme.patternGrid') },
+        { value: 'crossDot', name: this.$t('theme.patternCrossDot') }
+      ]
     }
   },
   watch: {
@@ -201,6 +248,53 @@ export default {
       this.setLocalConfig({
         isDark: target.dark
       })
+    },
+
+    selectPattern(value) {
+      this.setLocalConfig({ backgroundPattern: value })
+    },
+
+    onPatternColorChange(value) {
+      this.setLocalConfig({ bgPatternColor: value })
+    },
+
+    onPatternOpacityChange(value) {
+      this.setLocalConfig({ bgPatternOpacity: parseInt(value) })
+    },
+
+    getPatternPreviewStyle(value) {
+      const dark = this.isDark
+      const bg = dark ? '#2c2c2c' : '#f5f5f5'
+      const c = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.10)'
+      const cs = dark ? 'rgba(255,255,255,0.20)' : 'rgba(0,0,0,0.15)'
+      const patterns = {
+        none: { backgroundColor: bg },
+        dots: {
+          backgroundColor: bg,
+          backgroundImage: `radial-gradient(circle, ${cs} 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        },
+        grid: {
+          backgroundColor: bg,
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px), linear-gradient(90deg, ${c} 1px, transparent 1px)`,
+          backgroundSize: '24px 24px'
+        },
+        linesHorizontal: {
+          backgroundColor: bg,
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px)`,
+          backgroundSize: '10px 16px'
+        },
+        diagonal: {
+          backgroundColor: bg,
+          backgroundImage: `repeating-linear-gradient(45deg, ${c}, ${c} 1px, transparent 1px, transparent 10px)`
+        },
+        crossDot: {
+          backgroundColor: bg,
+          backgroundImage: `linear-gradient(${cs} 1px, transparent 1px), linear-gradient(90deg, ${cs} 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }
+      }
+      return patterns[value] || patterns.none
     }
   }
 }
@@ -267,6 +361,121 @@ export default {
       .name {
         text-align: center;
         font-size: 14px;
+      }
+    }
+
+    .patternSection {
+      padding-top: 10px;
+      border-top: 1px solid #e9e9e9;
+      margin-top: 10px;
+
+      .patternTitle {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 12px;
+        color: rgba(26, 26, 26, 0.9);
+      }
+
+      .patternGrid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .patternCard {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        overflow: hidden;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: #c0d8f0;
+        }
+
+        &.active {
+          border-color: rgb(154, 198, 250);
+        }
+
+        .patternPreview {
+          width: 100%;
+          height: 48px;
+          border-radius: 4px 4px 0 0;
+        }
+
+        .patternName {
+          text-align: center;
+          font-size: 12px;
+          padding: 4px 0;
+          color: rgba(26, 26, 26, 0.7);
+        }
+      }
+
+      .patternColorRow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+
+        .patternColorLabel {
+          font-size: 12px;
+          flex-shrink: 0;
+          color: rgba(26, 26, 26, 0.7);
+        }
+
+        .patternColorPicker {
+          width: 28px;
+          height: 24px;
+          border: 1px solid #ddd;
+          border-radius: 3px;
+          padding: 0;
+          cursor: pointer;
+          background: none;
+          flex-shrink: 0;
+        }
+
+        .patternOpacitySlider {
+          flex: 1;
+          min-width: 48px;
+        }
+
+        .patternOpacityValue {
+          font-size: 11px;
+          min-width: 30px;
+          text-align: right;
+          color: rgba(26, 26, 26, 0.5);
+          flex-shrink: 0;
+        }
+      }
+    }
+  }
+}
+
+.isDark {
+  .patternSection {
+    border-top-color: hsla(0, 0%, 100%, 0.1);
+
+    .patternTitle {
+      color: hsla(0, 0%, 100%, 0.9);
+    }
+
+    .patternCard {
+      .patternName {
+        color: hsla(0, 0%, 100%, 0.6);
+      }
+    }
+
+    .patternColorRow {
+      .patternColorLabel {
+        color: hsla(0, 0%, 100%, 0.6);
+      }
+
+      .patternColorPicker {
+        border-color: hsla(0, 0%, 100%, 0.2);
+      }
+
+      .patternOpacityValue {
+        color: hsla(0, 0%, 100%, 0.5);
       }
     }
   }
