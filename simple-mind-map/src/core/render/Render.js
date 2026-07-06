@@ -179,7 +179,7 @@ class Render {
       this.mindMap.on('view_data_change', onViewDataChange)
     }
     // 文本编辑时实时更新节点大小
-    this.onNodeTextEditChange = debounce(this.onNodeTextEditChange, 100, this)
+    this.onNodeTextEditChange = debounce(this.onNodeTextEditChange, 10, this)
     if (openRealtimeRenderOnNodeTextEdit) {
       this.mindMap.on('node_text_edit_change', this.onNodeTextEditChange)
     }
@@ -222,8 +222,14 @@ class Render {
     node.width = width
     node.height = height
     node.layout()
-    this.mindMap.render(() => {
+    // 布局后先同步一次编辑框，render 完成后再同步，减少输入框超出节点边框
+    if (this.textEdit.isShowTextEdit()) {
       this.textEdit.updateTextEditNode()
+    }
+    this.mindMap.render(() => {
+      if (this.textEdit.isShowTextEdit()) {
+        this.textEdit.updateTextEditNode()
+      }
     })
   }
 
