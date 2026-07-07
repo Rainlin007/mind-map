@@ -12,8 +12,20 @@ class View {
     this.x = 0
     this.y = 0
     this.firstDrag = true
+    this._dragRafId = 0
+    this._dragPendingX = 0
+    this._dragPendingY = 0
     this.setTransformData(this.mindMap.opt.viewData)
     this.bind()
+    this._initGpuHint()
+  }
+
+  // 提示浏览器对 SVG 画布启用 GPU 合成层
+  _initGpuHint() {
+    const svgNode = this.mindMap.svg && this.mindMap.svg.node
+    if (svgNode) {
+      svgNode.style.willChange = 'transform'
+    }
   }
 
   //  绑定
@@ -39,24 +51,35 @@ class View {
       this.sy = this.y
     })
     this.mindMap.event.on('drag', (e, event) => {
-      // 按住ctrl键拖动为多选
-      // 禁用拖拽
       if (e.ctrlKey || e.metaKey || this.mindMap.opt.isDisableDrag) {
         return
       }
       if (this.firstDrag) {
         this.firstDrag = false
-        // 清除激活节点
         if (this.mindMap.renderer.activeNodeList.length > 0) {
           this.mindMap.execCommand('CLEAR_ACTIVE_NODE')
         }
       }
-      this.x = this.sx + event.mousemoveOffset.x
-      this.y = this.sy + event.mousemoveOffset.y
-      this.transform()
+      this._dragPendingX = this.sx + event.mousemoveOffset.x
+      this._dragPendingY = this.sy + event.mousemoveOffset.y
+      if (!this._dragRafId) {
+        this._dragRafId = requestAnimationFrame(() => {
+          this._dragRafId = 0
+          this.x = this._dragPendingX
+          this.y = this._dragPendingY
+          this.transform()
+        })
+      }
     })
     this.mindMap.event.on('mouseup', () => {
       this.firstDrag = true
+      if (this._dragRafId) {
+        cancelAnimationFrame(this._dragRafId)
+        this._dragRafId = 0
+        this.x = this._dragPendingX
+        this.y = this._dragPendingY
+        this.transform()
+      }
     })
     // 放大缩小视图
     this.mindMap.event.on('mousewheel', (e, dirs, event, isTouchPad) => {
